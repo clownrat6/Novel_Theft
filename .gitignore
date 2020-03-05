@@ -1,0 +1,15 @@
+# folder
+
+# global
+
+# local
+/.vscode
+
+# file
+
+# global
+*.exe
+
+# local
+/*.txt
+!/target.txt
