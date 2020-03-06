@@ -1,9 +1,10 @@
 # folder
 
 # global
+__pycache__/
 
 # local
-/.vscode
+/.vscode/
 
 # file
 
