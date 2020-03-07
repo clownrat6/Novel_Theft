@@ -1,21 +1,29 @@
 import os
+import time
+import threading
+import _thread
 
-from parse import main_parse, page_parse, target_parse, illustration_parse, chapter_parse
+from parse import target_parse
+from thread_task import target_thread
 
-# target_dict = target_parse('target.txt')
+target_dict = target_parse('target.txt')
 
-# target_keys = list(target_dict.keys())
+target_keys = list(target_dict.keys())
 
-# url = target_dict[target_keys[0]]
+base_path = 'build'
 
-# main_dict = main_parse(url)
+# 创建线程
+thread_list = []
+for target in target_keys:
+    thread_single = threading.Thread(target=target_thread, args=(target_dict[target], target, base_path))
+    thread_list.append(thread_single)
 
+for thread in thread_list:
+    thread.start()
 
-# pic_content = req.get(url).content
-# with open(os.path.join(pic_base_path, '{}.jpg'.format(index)), 'wb') as f:
-#     f.write(pic_content)
+for thread_list in thread_list:
+    thread.join()
 
-main_dict = eval(open('temp.txt', 'r', encoding='utf-8').read())
+thread_list = threading.enumerate()
 
-for key in main_dict.keys():
-    chapter_parse(main_dict, key, 'build')
+print(thread_list)

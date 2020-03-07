@@ -2,6 +2,7 @@ import os
 import requests as req
 
 from lxml import etree
+from util import pic_write
 
 def target_parse(target_path):
 
@@ -15,7 +16,7 @@ def target_parse(target_path):
     
     return target_dict
 
-def page_parse(url):
+def txt_page_parse(url):
 
     req_obj = req.get(url)
     req_obj.encoding = 'gbk'
@@ -28,11 +29,36 @@ def page_parse(url):
     one_page = ""
 
     for i in main.getchildren():
+        if(i.tail == None): continue
         if(len(i.tail) == 2): continue
         preprocess = '    ' + i.tail.replace('\n', '').replace(chr(0xa0), '')
         one_page += preprocess + '\n' + '\n'
 
     return one_page
+
+def illustration_page_parse(url):
+
+    req_obj = req.get(url)
+    req_obj.encoding = 'gbk'
+
+    raw_content = req_obj.text # get_obj.text.encode(req_obj.encoding).decode('gbk')    
+
+    html = etree.HTML(raw_content)
+    main = html.xpath('//div[@id="content"]')[0]
+
+    image_list = main.xpath('//div[@class="divimage"]')
+
+    image_url_list = []
+    index = 0
+    for image in image_list:
+        index += 1
+        url = image.getchildren()[0].xpath('@href')[0]
+        image_url_list.append(url)
+
+    ret_str = [x+'\n' for x in image_url_list]
+    ret_str = ''.join(ret_str)
+    
+    return ret_str
 
 def main_parse(url):
 
@@ -66,30 +92,6 @@ def main_parse(url):
 
     return result
 
-def illustration_parse(url):
-
-    req_obj = req.get(url)
-    req_obj.encoding = 'gbk'
-
-    raw_content = req_obj.text # get_obj.text.encode(req_obj.encoding).decode('gbk')    
-
-    html = etree.HTML(raw_content)
-    main = html.xpath('//div[@id="content"]')[0]
-
-    image_list = main.xpath('//div[@class="divimage"]')
-
-    image_url_list = []
-    index = 0
-    for image in image_list:
-        index += 1
-        url = image.getchildren()[0].xpath('@href')[0]
-        image_url_list.append(url)
-
-    ret_str = [x+'\n' for x in image_url_list]
-    ret_str = ''.join(ret_str)
-    
-    return ret_str
-
 def chapter_parse(main_dict, chapter_num, base_path):
 
     # 单卷内的解析
@@ -98,13 +100,26 @@ def chapter_parse(main_dict, chapter_num, base_path):
     
     if(not os.path.exists(chapter_folder)):
         os.makedirs(chapter_folder, 0x777)
-    
+
     keys = chapter_dict.keys()
+    index = 0
     for key in keys:
-        f = open('{}/{}.txt'.format(chapter_folder, key), 'w', encoding='utf-8')
+        index += 1
+        gene_path = '{}/{}_{}.txt'.format(chapter_folder, index, key)
+        print(gene_path)
+        if(os.path.exists(gene_path)): continue
+        f = open(gene_path, 'w', encoding='utf-8')
         if(key == "插图"): 
-            f.write(illustration_parse(chapter_dict[key])) 
+            f.write(illustration_page_parse(chapter_dict[key])) 
             f.close()
             continue
-        f.write(page_parse(chapter_dict[key]))
+        f.write(txt_page_parse(chapter_dict[key]))
         f.close()
+
+def pic_parse(url):
+
+    req_obj = req.get(url):
+
+    raw_content = req_obj.content
+    
+    return raw_content

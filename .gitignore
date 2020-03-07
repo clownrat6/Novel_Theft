@@ -13,4 +13,5 @@ __pycache__/
 
 # local
 /*.txt
+/try.py
 !/target.txt
