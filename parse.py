@@ -123,3 +123,15 @@ def pic_parse(url):
     raw_content = req_obj.content
     
     return raw_content
+
+def cover_parse(url):
+
+    req_obj = req.get(url)
+    req_obj.encoding = 'gbk'
+
+    raw_content = req_obj.text # get_obj.text.encode(req_obj.encoding).decode('gbk')    
+
+    html = etree.HTML(raw_content)
+    src = html.xpath('//div[@id="content"]//table//img//@src')[0]
+
+    return src

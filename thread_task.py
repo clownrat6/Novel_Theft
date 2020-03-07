@@ -2,7 +2,7 @@ import os
 import threading
 
 from parse import main_parse, txt_page_parse, target_parse, \
-                  illustration_page_parse, chapter_parse, pic_parse
+                  illustration_page_parse, chapter_parse, pic_parse, cover_parse
 from util import pic_write
 
 def target_thread(url, target_key, base_path):
@@ -13,8 +13,20 @@ def target_thread(url, target_key, base_path):
 
     main_dict = main_parse(url)
 
+    # 下载书籍部分
     for key in main_dict.keys():
         chapter_parse(main_dict, key, target_path)
+
+    # 下载封面
+    cover_url = url.replace('https://', '')
+    cover_url = cover_url.replace('http://', '')
+    cover_url = cover_url.split('/')
+    cover_url = 'https://' + cover_url[0] +  '/book/' + str(cover_url[3]) + '.htm'
+    cover_url = cover_parse(cover_url)
+    print(cover_url)
+    cover_path = target_path + '/cover.jpg'
+    if(os.path.exists(cover_path)): return None
+    pic_write(pic_parse(cover_url), cover_path)
 
 def target_main_thread_list(target_dict, base_path):
     target_keys = list(target_dict.keys())
@@ -24,7 +36,7 @@ def target_main_thread_list(target_dict, base_path):
         thread_single = threading.Thread(target=target_thread, \
                         args=(target_dict[target], target, base_path))
         thread_list.append(thread_single)
-    
+
     return thread_list
 
 def pic_download(txt_path):
@@ -41,7 +53,7 @@ def pic_download(txt_path):
             index += 1
             pic_path = os.path.join(save_path, '{}.jpg'.format(index))
             if(os.path.exists(pic_path)): continue
-                print(pic_path)
+            print(pic_path)
             line = line.strip()
             pic_write(pic_parse(line), pic_path)
 
