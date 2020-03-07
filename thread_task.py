@@ -41,6 +41,7 @@ def pic_download(txt_path):
             index += 1
             pic_path = os.path.join(save_path, '{}.jpg'.format(index))
             if(os.path.exists(pic_path)): continue
+                print(pic_path)
             line = line.strip()
             pic_write(pic_parse(line), pic_path)
 

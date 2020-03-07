@@ -17,10 +17,10 @@ arg_dict = arg()
 
 thread_list = []
 if(arg_dict['--task'] == 'main'):
-    thread_list = target_pic_thread_list(target_dict, base_path)
-    print("txt content downloading!!")
-else if(arg_dict['--task'] == 'picture'):
     thread_list = target_main_thread_list(target_dict, base_path)
+    print("txt content downloading!!")
+elif(arg_dict['--task'] == 'picture'):
+    thread_list = target_pic_thread_list(target_dict, base_path)
     print("illustration downloading!!")
 
 for thread in thread_list:
