@@ -118,7 +118,7 @@ def chapter_parse(main_dict, chapter_num, base_path):
 
 def pic_parse(url):
 
-    req_obj = req.get(url):
+    req_obj = req.get(url)
 
     raw_content = req_obj.content
     
