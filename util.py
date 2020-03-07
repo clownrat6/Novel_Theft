@@ -10,4 +10,5 @@ def dict_load(save_filepath):
 
 def pic_write(content, save_filepath):
     with open(save_filepath, 'wb') as f:
+        print(save_filepath)
         f.write(content)

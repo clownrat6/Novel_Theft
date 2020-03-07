@@ -39,13 +39,14 @@ def target_main_thread_list(target_dict, base_path):
 
     return thread_list
 
-def pic_download(txt_path):
+def pic_download_thread_list(txt_path):
     base_path = os.path.split(txt_path)[0]
     save_path = os.path.join(base_path, 'illustration')
 
     if(not os.path.exists(save_path)):
         os.makedirs(save_path, 0x777)
     
+    thread_list = []
     with open(txt_path, 'r') as f:
         lines = f.readlines()
         index = 0
@@ -53,9 +54,12 @@ def pic_download(txt_path):
             index += 1
             pic_path = os.path.join(save_path, '{}.jpg'.format(index))
             if(os.path.exists(pic_path)): continue
-            print(pic_path)
             line = line.strip()
-            pic_write(pic_parse(line), pic_path)
+            pic_thread = threading.Thread(target=lambda save_path,url:pic_write(pic_parse(url), save_path), \
+                                          kwargs={"save_path":pic_path, "url":line})
+            thread_list.append(pic_thread)
+    
+    return thread_list
 
 def target_pic_thread_list(target_dict, base_path):
     target_keys = list(target_dict.keys())
@@ -67,13 +71,14 @@ def target_pic_thread_list(target_dict, base_path):
         chapter_list = os.listdir(target_path)
         
         for chapter in chapter_list:
+            if(chapter == 'cover.jpg'): continue
             chapter_path = os.path.join(target_path, chapter)
             item_list = os.listdir(chapter_path)
             for item in item_list:
                 if('插图' in item): 
                     item_path = os.path.join(chapter_path, item)
-                    item_thread = threading.Thread(target=pic_download, kwargs={"txt_path":item_path})
-                    thread_list.append(item_thread)
+                    additional = pic_download_thread_list(item_path)
+                    thread_list += additional
 
     return thread_list
 
