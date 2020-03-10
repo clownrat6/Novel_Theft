@@ -7,6 +7,7 @@ from parse import target_parse
 from thread_task import target_main_thread_list, target_pic_thread_list
 from arg_parser import arg_parser
 
+
 # base information
 target_dict = target_parse('target.txt')
 base_path = 'build'

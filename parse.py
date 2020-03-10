@@ -1,8 +1,10 @@
 import os
+import pythoncom
 import requests as req
 
 from lxml import etree
 from util import pic_write
+from win32com.client import Dispatch
 
 def target_parse(target_path):
 
@@ -116,13 +118,18 @@ def chapter_parse(main_dict, chapter_num, base_path):
         f.write(txt_page_parse(chapter_dict[key]))
         f.close()
 
-def pic_parse(url):
+def pic_parse(url, filename):
+    # 图像解析新方案，requests 的请求方式可能太粗糙了，不太行，所以换用迅雷的调用。
+    # req_obj = req.get(url)
 
-    req_obj = req.get(url)
-
-    raw_content = req_obj.content
-    
-    return raw_content
+    # raw_content = req_obj.content
+    # 这种方法毕竟还是存在缺点，实在不太好，需要手动操作一下。
+    pythoncom.CoInitialize()
+    # return raw_content
+    thunder = Dispatch('ThunderAgent.Agent64.1')
+    thunder.AddTask(url, filename)
+    thunder.CommitTasks()
+    pythoncom.CoUninitialize()
 
 def cover_parse(url):
 

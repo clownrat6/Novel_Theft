@@ -55,8 +55,8 @@ def pic_download_thread_list(txt_path):
             pic_path = os.path.join(save_path, '{}.jpg'.format(index))
             if(os.path.exists(pic_path)): continue
             line = line.strip()
-            pic_thread = threading.Thread(target=lambda save_path,url:pic_write(pic_parse(url), save_path), \
-                                          kwargs={"save_path":pic_path, "url":line})
+            pic_thread = threading.Thread(target=lambda filename,url:pic_parse(url, filename), \
+                                          kwargs={"filename":pic_path, "url":line})
             thread_list.append(pic_thread)
     
     return thread_list
