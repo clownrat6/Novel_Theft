@@ -1,4 +1,6 @@
 import os
+import re
+import shutil
 import pythoncom
 import requests as req
 
@@ -142,3 +144,46 @@ def cover_parse(url):
     src = html.xpath('//div[@id="content"]//table//img//@src')[0]
 
     return src
+
+def verify_completeness(target_txt_path):
+    """
+    to check if all of the illustration has been downloaded.
+    """
+    target_dict = target_parse(target_txt_path)
+
+    for key in target_dict.keys():
+        target_root = os.path.join('build', key)
+        volume_list = os.listdir(target_root)
+        for volume in volume_list:
+            volume_path = os.path.join(target_root, volume)
+            if(not os.path.isdir(volume_path)): continue
+            chapter_list = os.listdir(volume_path)
+            chapter_list = ['{}/\\'.format(x) for x in chapter_list]
+            chapter_string = ''.join(chapter_list)
+            if('插图' not in chapter_string): continue
+            illus_name = re.search('[0-9]*_插图.*?\.txt', chapter_string)
+            illus_name = illus_name.group(0)
+            num = len(open(volume_path + '/' + illus_name, 'r').readlines())
+            for i in range(1, num+1):
+                pic_path = os.path.join(volume_path, 'illustration', '{}.jpg'.format(i))
+                if(not os.path.exists(pic_path)): print("{} don't exits".format(pic_path))
+
+def move_from_thunder(download_root):
+    root_path = download_root
+    file_list = os.listdir(root_path)
+    for file in file_list:
+        src_path = os.path.join(root_path, file)
+        file = file.replace('_', '')
+        file = file.replace('illustration', '_')
+        name = re.search('[0-9]*.jpg', file)
+        target = re.search('(?<=build).*(?=(第.*卷|番外))', file)
+        if(target == None): continue
+        target = target.group(0)
+        # volume 才是卷的意思，😓
+        file = file.replace('build{}'.format(target), '')
+        volume = re.search('.*(?=_)', file)
+        if(name == None or volume == None): continue
+        name = name.group(0)
+        volume = volume.group(0)
+        dst_path = 'build/{}/{}/illustration/{}'.format(target, volume, name)
+        shutil.move(src_path, dst_path)
