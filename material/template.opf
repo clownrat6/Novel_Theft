@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<package version="2.0" unique-identifier="PrimaryID" xmlns="http://www.idpf.org/2007/opf">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+<dc:title>xxx</dc:title>
+<dc:identifier opf:scheme="ISBN"></dc:identifier>
+<dc:language>zh-CN</dc:language>
+<dc:creator>xxx</dc:creator>
+<dc:publisher>Novel_theft</dc:publisher>
+<dc:description></dc:description>
+<dc:coverage></dc:coverage>
+<dc:source>https://github.com/sennnnn/Novel_Theft</dc:source>
+<dc:date>xxx</dc:date>
+<dc:rights>自娱自乐的epub制作工具，随意使用。</dc:rights>
+<dc:subject>轻小说</dc:subject>
+<dc:contributor></dc:contributor>
+<dc:type>[type]</dc:type>
+<dc:format></dc:format>
+<dc:relation></dc:relation>
+<dc:builder>Novel_theft</dc:builder>
+<dc:builder_version>0.1</dc:builder_version>
+<meta name="cover" content="cover-image"/>
+</metadata>
+<manifest>
+<!-- Content Documents -->
+<item id="main-css" href="css/main.css" media-type="text/css"/>
+<item id="coverpage"  href="coverpage.html"  media-type="application/xhtml+xml"/>
+
+<item id="ncx"  href="sen.ncx" media-type="application/x-dtbncx+xml"/>
+<item id="css" href="css/main.css" media-type="text/css"/>
+<item id="cover-image" href="images/cover.jpg" media-type="image/jpeg"/>
+</manifest>
+<spine toc="ncx">
+<itemref idref="coverpage" linear="yes"/>
+
+</spine>
+<guide>
+<reference type="cover" title="封面"  href="coverpage.html"/>
+
+</guide>
+</package>

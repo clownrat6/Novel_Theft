@@ -5,7 +5,7 @@ import pythoncom
 import requests as req
 
 from lxml import etree
-from util import pic_write
+from util import pic_write,num_to_word,match_between,word_to_num
 from win32com.client import Dispatch
 
 def target_parse(target_path):
@@ -34,9 +34,8 @@ def txt_page_parse(url):
 
     for i in main.getchildren():
         if(i.tail == None): continue
-        if(len(i.tail) == 2): continue
         preprocess = '    ' + i.tail.replace('\n', '').replace(chr(0xa0), '')
-        one_page += preprocess + '\n' + '\n'
+        one_page += preprocess + '\n'
 
     return one_page
 
@@ -187,3 +186,54 @@ def move_from_thunder(download_root):
         volume = volume.group(0)
         dst_path = 'build/{}/{}/illustration/{}'.format(target, volume, name)
         shutil.move(src_path, dst_path)
+
+def gene_info():
+    root_path = 'build'
+    target_list = os.listdir(root_path)
+    for target in target_list:
+        target_path = os.path.join(root_path, target)
+        volume_list = os.listdir(target_path)
+        None_list = []
+        volume_dict = {}
+        for volume in volume_list:
+            index = match_between('第', '卷', volume)
+            volume_path = os.path.join(target_path, volume)
+            if(not os.path.isdir(volume_path)): continue
+            if(index == None): 
+                None_list.append(volume)
+                continue
+            volume_dict[volume] = word_to_num(index)
+        sorted_volume_list = [x[0] for x in sorted(volume_dict.items(), key=lambda x:x[1])]
+        sorted_volume_list += None_list
+        for volume in sorted_volume_list:
+            volume_path = os.path.join(target_path, volume)
+            chapter_list = os.listdir(volume_path)
+            temp = []
+            for chapter in chapter_list:
+                chapter_path = os.path.join(volume_path, chapter)
+                if(not os.path.isfile(chapter_path)): continue
+                if(chapter == 'info.txt'): continue
+                temp.append(chapter)
+            chapter_list = temp
+            chapter_list = sorted(chapter_list, key=lambda x:int(x.split('_')[0]))
+            # 还是把插图放在前面吧
+            chapter_list = [chapter_list[-1]] + chapter_list[:-1]
+            f = open('{}/info.txt'.format(volume_path), 'w', encoding='utf-8')
+            index = 0
+            for chapter in chapter_list:
+                chapter_name = os.path.splitext(chapter)[0].split('_')[1]
+                index += 1
+                f.write('{}:{}\n'.format(index, chapter_name))
+            f.close()
+
+def parse_info(txt_path):
+    with open(txt_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        ret_dict = {}
+        for line in lines:
+            line = line.strip()
+            index = int(line.split(':')[0])
+            title = line.split(':')[1]
+            ret_dict[index] = title
+
+        return ret_dict
