@@ -182,21 +182,21 @@ def construct_epub(book_name, author, epub_title, build_path, raw_root_path):
                 path = os.path.join(raw_root_path, '{}_{}.txt'.format(index, item))
                 f.write(get_chapter(path))
 
-target_list = ['一', '二', '三', '四', '五', '六']
+genespace = 'get'
+target_list = ['一', '二']
 for target in target_list:
     target = '第{}卷'.format(target)
-    raw_root_path = r'F:\大学\项目\轻文解析器\build\被学生胁迫这事儿是犯罪吗？\{}'.format(target)
-    build_path = 'try'
+    raw_root_path = r'F:\大学\项目\轻文解析器\build\青梅竹马绝对不会输的恋爱喜剧\{}'.format(target)
+    build_path = '{}/try'.format(genespace)
     if(os.path.exists(build_path)):
         shutil.rmtree(build_path)
-    construct_epub('被学生胁迫这事儿是犯罪吗？', '相乐总', '{}-{}'.format('被学生胁迫这事儿是犯罪吗？', target), build_path, raw_root_path)
+    construct_epub('青梅竹马绝对不会输的恋爱喜剧', '二丸修一', '{}-{}'.format('青梅竹马绝对不会输的恋爱喜剧', target), build_path, raw_root_path)
     file_walk = os.walk(build_path)
-    f = zipfile.ZipFile('{}/{}.epub'.format(build_path, target), 'w', zipfile.ZIP_DEFLATED)
+    f = zipfile.ZipFile('{}/{}.epub'.format(genespace, target), 'w', zipfile.ZIP_DEFLATED)
     for root,sub,file in file_walk:
         root_re = root.replace(build_path, '.')
         for sin in file:
             if(os.path.splitext(sin)[1] == '.epub'): continue
             f.write(os.path.join(root, sin), os.path.join(root_re, sin))
     f.close()
-    shutil.move('{}/{}.epub'.format(build_path, target), '{}.epub'.format(target))
     shutil.rmtree(build_path)
