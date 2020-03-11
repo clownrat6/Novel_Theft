@@ -1,4 +1,5 @@
 import re
+import time
 
 from lxml import etree
 
@@ -59,3 +60,6 @@ def word_to_num(word):
         ret += word_sort.index(word[1]) if(word[1] != '十') else 0
     
     return ret
+
+def get_time():
+    return time.strftime("%Y-%m-%d", time.localtime(time.time()))

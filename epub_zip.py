@@ -4,7 +4,7 @@ import shutil
 import zipfile
 
 from parse import parse_info
-from util import match_between
+from util import match_between,get_time
 from lxml import etree
 from copy import deepcopy
 from util import etree_string
@@ -78,11 +78,19 @@ def get_ncx(title, author, info_dict, template_ncx_path='material/template.ncx')
     
     return head + etree_string(root)
 
-def get_opf(info_dict, build_path, template_ncx_path='material/template.opf'):
+def get_opf(info_dict, build_path, book_title, template_ncx_path='material/template.opf'):
     namespace = 'http://www.idpf.org/2007/opf'
+    dc_namespace = 'http://purl.org/dc/elements/1.1/'
     ncx_f = etree.parse(template_ncx_path)
     root = ncx_f.getroot()
     root_children = root.getchildren()
+    metadata = root_children[0]
+    date = metadata.xpath('//dc:date', namespaces={'dc': dc_namespace})[0]
+    date.text = get_time()
+    creator = metadata.xpath('//dc:creator', namespaces={'dc': dc_namespace})[0]
+    creator.text = 'sen'
+    title = metadata.xpath('//dc:title', namespaces={'dc': dc_namespace})[0]
+    title.text = book_title
     manifest = root_children[1]
     spine = root_children[2]
     item_cov = manifest.xpath('x:item[@id="coverpage"]', namespaces={'x': namespace})[0]
@@ -138,7 +146,7 @@ def get_illustration(illustration_path, template_html_path='material/template.ht
 
     return etree_string(root)
 
-def construct_epub(book_name, author, build_path, raw_root_path):
+def construct_epub(book_name, author, epub_title, build_path, raw_root_path):
     info_dict = parse_info(raw_root_path + '\info.txt')
     if(not os.path.exists('{}/META-INF'.format(build_path))):
         os.makedirs('{}/META-INF'.format(build_path), 0x777)
@@ -158,7 +166,7 @@ def construct_epub(book_name, author, build_path, raw_root_path):
         ncx = get_ncx(book_name, author, info_dict)
         f.write(ncx)
     with open('{}/OPS/sen.opf'.format(build_path), 'w', encoding='utf-8') as f:
-        opf = get_opf(info_dict, build_path)
+        opf = get_opf(info_dict, build_path, epub_title)
         f.write(opf)
 
     flag = 0
@@ -181,12 +189,13 @@ for target in target_list:
     build_path = 'try'
     if(os.path.exists(build_path)):
         shutil.rmtree(build_path)
-    construct_epub('被学生胁迫这事儿是犯罪吗？', '相乐总', build_path, raw_root_path)
+    construct_epub('被学生胁迫这事儿是犯罪吗？', '相乐总', '{}-{}'.format('被学生胁迫这事儿是犯罪吗？', target), build_path, raw_root_path)
     file_walk = os.walk(build_path)
     f = zipfile.ZipFile('{}/{}.epub'.format(build_path, target), 'w', zipfile.ZIP_DEFLATED)
     for root,sub,file in file_walk:
         root_re = root.replace(build_path, '.')
         for sin in file:
+            if(os.path.splitext(sin)[1] == '.epub'): continue
             f.write(os.path.join(root, sin), os.path.join(root_re, sin))
     f.close()
     shutil.move('{}/{}.epub'.format(build_path, target), '{}.epub'.format(target))
