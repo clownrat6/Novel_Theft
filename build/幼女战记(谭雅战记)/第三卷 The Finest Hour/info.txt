@@ -1,9 +1,0 @@
-1:插图
-2:第壹章 芝麻开门（Open Sesame）
-3:第贰章 过迟的介入（The intervene, Which was too late）
-4:第参章 方舟作战发动（Operation an ark）
-5:第肆章 胜利的使用方式（How to use victory）
-6:第伍章 内政阶段（Internal affairs）
-7:第陆章 南方战役（The southern campaign）
-8:附录 历史概略图
-9:后记

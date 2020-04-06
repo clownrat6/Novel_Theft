@@ -1,9 +1,0 @@
-1:插图
-2:第壹章 长距离侦查任务（Long range reconnaissance mission）
-3:第贰章 亲善访问（Goodwill visit）
-4:第参章 完美的胜利（Magnificent victory）
-5:第肆章 重新编制（Reorganization）
-6:第伍章 渡渡巴德空战（Battle of Dodobird）
-7:第陆章 门环作战（Operation Door Knocker）
-8:附录 历史概略图
-9:后记
