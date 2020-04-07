@@ -114,8 +114,17 @@ def illustration_page_parse(url):
     return image_url_list
 
 def pic_parse(url, save_path=None):
-
-    req_obj = req.get(url, timeout=10)
+    # timeout 元组第一个参数为连接超时时间，第二个参数为读取超时时间
+    i = 0
+    while(i < 3):
+        try:
+            req_obj = req.get(url, timeout=(3, 10))
+        except requests.exceptions.RequestException:
+            i += 1
+    
+    if(i == 3): 
+        print('{} 已经尝试超过三次均失败。'.format(save_path))
+        assert False, 'Fxxk up'
 
     raw_content = req_obj.content
 

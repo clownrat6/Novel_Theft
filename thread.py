@@ -3,7 +3,7 @@ import requests
 
 from util import pic_write
 from parse import txt_page_parse,illustration_page_parse,pic_parse
-from concurrent.futures import ThreadPoolExecutor,as_completed
+from concurrent.futures import ThreadPoolExecutor,wait,ALL_COMPLETED
 
 def download_txt(get_dict, base_dir):
     executor = ThreadPoolExecutor(max_workers=10)
@@ -11,9 +11,10 @@ def download_txt(get_dict, base_dir):
     volume_list = get_dict.keys()
     for volume in volume_list:
         volume_dir = os.path.join(base_dir, volume)
+        chapter_list = get_dict[volume].keys()
+        if('插图' not in chapter_list): continue
         if(not os.path.exists(volume_dir)):
             os.makedirs(volume_dir, 0x777)
-        chapter_list = get_dict[volume].keys()
         index = 0
         for chapter in chapter_list:
             if(chapter == '插图'): continue
@@ -22,6 +23,8 @@ def download_txt(get_dict, base_dir):
             chapter_txt_path = os.path.join(volume_dir, '{}${{{}}}.txt'.format(index, chapter))
             if(os.path.exists(chapter_txt_path)): continue
             thread_task_list.append(executor.submit(txt_page_parse, txt_page_url, chapter_txt_path))
+    
+    return thread_task_list
 
 def download_illustration(get_dict, base_dir):
     executor = ThreadPoolExecutor(max_workers=10)
@@ -49,4 +52,6 @@ def download_illustration(get_dict, base_dir):
                 if(os.path.exists(illustration_path)): continue
                 print(illustration_path, 'downloading...')
                 thread_task_list.append(executor.submit(pic_parse, illustration, illustration_path))
+    
+    return thread_task_list
             
