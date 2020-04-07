@@ -67,6 +67,11 @@ def two_stage_parse(url):
                 txt_page_url = url.replace('index.htm', a.xpath('.//@href')[0])
                 ret_dict[volume_head][chapter_head] = txt_page_url
 
+    volume_name_list = list(ret_dict.keys())
+    for volume in volume_name_list:
+        if('插图' not in list(ret_dict[volume].keys())):
+            ret_dict.pop(volume)
+
     return ret_dict
 
 def txt_page_parse(url, save_path=None):
@@ -119,7 +124,8 @@ def pic_parse(url, save_path=None):
     while(i < 3):
         try:
             req_obj = req.get(url, timeout=(3, 10))
-        except requests.exceptions.RequestException:
+            break
+        except req.exceptions.RequestException:
             i += 1
     
     if(i == 3): 
