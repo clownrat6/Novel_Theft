@@ -3,31 +3,20 @@ import time
 import threading
 import _thread
 
-from parse import target_parse
-from thread_task import target_main_thread_list, target_pic_thread_list
-from arg_parser import arg_parser
+from epub import epub_zip
+from parse import one_stage_parse,two_stage_parse
+from thread import download_txt,download_illustration
 
+# 现在是以单本书为单元的程序了
+# 主页 url
+main_page_url = 'https://www.wenku8.net/book/2488.htm'
 
-# base information
-target_dict = target_parse('target.txt')
-base_path = 'build'
+# 获取小说文字，插图，名字，作者
+novel_name,author_name,novel_content_url = one_stage_parse(main_page_url)
+content_dict = two_stage_parse(novel_content_url)
 
-arg = arg_parser()
-arg.add_val('--task', 'main')
-arg_dict = arg()
-
-thread_list = []
-if(arg_dict['--task'] == 'main'):
-    thread_list = target_main_thread_list(target_dict, base_path)
-    print("txt content downloading!!")
-elif(arg_dict['--task'] == 'picture'):
-    thread_list = target_pic_thread_list(target_dict, base_path)
-    print("illustration downloading!!")
-
-for thread in thread_list:
-    thread.start()
-
-for thread in thread_list:
-    thread.join()
-
-print("done!!")
+# 下载小说文字，与插图
+download_txt(content_dict, 'build')
+download_illustration(content_dict, 'build')
+# 打包成 eupb
+epub_zip(novel_name, author_name, 'test', 'build')

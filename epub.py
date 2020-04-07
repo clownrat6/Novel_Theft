@@ -3,7 +3,6 @@ import re
 import shutil
 import zipfile
 
-from parse import parse_info
 from util import match_between,get_time
 from lxml import etree
 from copy import deepcopy
@@ -66,6 +65,9 @@ def get_ncx(title, author, info_dict, template_ncx_path='material/template.ncx')
     navMap = root_children[3]
     navNode_c = navMap.xpath('//x:navPoint[@id="coverpage"]', namespaces={'x': namespace})[0]
     index = 0
+    index += 1
+    navMap.append(create_navnode(navNode_c, 'illustration', str(index), \
+                 'illustration.html', '插图', namespace))
     for key in info_dict.keys():
         index += 1
         navMap.append(create_navnode(navNode_c, 'chapter' + str(key), str(index), \
@@ -95,6 +97,8 @@ def get_opf(info_dict, build_path, book_title, template_ncx_path='material/templ
     spine = root_children[2]
     item_cov = manifest.xpath('x:item[@id="coverpage"]', namespaces={'x': namespace})[0]
     itemref_cov = spine.xpath('x:itemref[@idref="coverpage"]', namespaces={'x': namespace})[0]
+    manifest.append(create_item(item_cov, '插图', 'illustration.html'))
+    spine.append(create_itemref(itemref_cov, '插图'))
     for key in info_dict.keys():
         manifest.append(create_item(item_cov, 'chapter' + str(key), 'chapter{}.html'.format(key)))
         spine.append(create_itemref(itemref_cov, 'chapter' + str(key)))
@@ -105,16 +109,16 @@ def get_opf(info_dict, build_path, book_title, template_ncx_path='material/templ
     head = """<?xml version="1.0" encoding="UTF-8" ?>\n"""
     return head + etree_string(root)
 
-def get_chapter(txt_path, template_html_path='material/template.html'):
+def get_chapter(txt_path, chapter_title, template_html_path='material/template.html'):
     namespace = "http://www.w3.org/1999/xhtml"
     html_f = etree.parse(template_html_path)
     root = html_f.getroot()
     root_children = root.getchildren()
     head_title = root_children[0].xpath('//x:title', namespaces={'x': namespace})[0]
-    head_title.text = os.path.splitext(os.path.split(txt_path)[1])[0].split('_')[1]
+    head_title.text = chapter_title
     div = root_children[1].xpath('//x:div', namespaces={'x': namespace})[0]
     title = div.xpath('//x:h3//x:b', namespaces={'x': namespace})[0]
-    title.text = os.path.splitext(os.path.split(txt_path)[1])[0].split('_')[1]
+    title.text = chapter_title
 
     with open(txt_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -134,8 +138,8 @@ def get_illustration(illustration_path, template_html_path='material/template.ht
     div = root_children[1].xpath('//x:div', namespaces={'x': namespace})[0]
     title = div.xpath('//x:h3//x:b', namespaces={'x': namespace})[0]
     title.text = '插图'  
-    pic_list = os.listdir(illustration_path)
-    pic_list = sorted(pic_list, key=lambda x: int(os.path.splitext(x)[0]))
+    pic_list = os.listdir(illustration_path);pic_list.remove('cover.jpg')
+    pic_list = sorted(pic_list, key=lambda x:int(os.path.splitext(x)[0]))
     for pic in pic_list:
         p = etree.Element('p')
         p.set('style', "text-indent:0em")
@@ -146,8 +150,7 @@ def get_illustration(illustration_path, template_html_path='material/template.ht
 
     return etree_string(root)
 
-def construct_epub(book_name, author, epub_title, build_path, raw_root_path):
-    info_dict = parse_info(raw_root_path + '\info.txt')
+def construct_epub(novel_name, novel_author, epub_title, build_path, raw_root_path, info_dict):
     if(not os.path.exists('{}/META-INF'.format(build_path))):
         os.makedirs('{}/META-INF'.format(build_path), 0x777)
     if(not os.path.exists('{}/OPS'.format(build_path))):
@@ -158,45 +161,47 @@ def construct_epub(book_name, author, epub_title, build_path, raw_root_path):
     shutil.copy('material/mimetype', '{}/mimetype'.format(build_path))
     shutil.copy('material/container.xml', '{}/META-INF/container.xml'.format(build_path))
     shutil.copy('material/coverpage.html', '{}/OPS/coverpage.html'.format(build_path))
-    if(os.path.exists(raw_root_path + '/illustration') and not os.path.exists('{}/OPS/images'.format(build_path))):
-        shutil.copytree(raw_root_path + '/illustration', '{}/OPS/images'.format(build_path))
-        shutil.copy('{}/OPS/images/1.jpg'.format(build_path), '{}/OPS/images/cover.jpg'.format(build_path))
-        
+    if(os.path.exists(raw_root_path + '/插图') and not os.path.exists('{}/OPS/images'.format(build_path))):
+        shutil.copytree(raw_root_path + '/插图', '{}/OPS/images'.format(build_path))
+    
     with open('{}/OPS/sen.ncx'.format(build_path), 'w', encoding='utf-8') as f:
-        ncx = get_ncx(book_name, author, info_dict)
+        ncx = get_ncx(novel_name, novel_author, info_dict)
         f.write(ncx)
     with open('{}/OPS/sen.opf'.format(build_path), 'w', encoding='utf-8') as f:
         opf = get_opf(info_dict, build_path, epub_title)
         f.write(opf)
 
-    flag = 0
+    with open('{}/OPS/illustration.html'.format(build_path), 'w', encoding='utf-8') as f:
+        path = os.path.join(raw_root_path, '插图')
+        f.write(get_illustration(path))
+
     for index,item in info_dict.items():
         with open('{}/OPS/chapter{}.html'.format(build_path, index), 'w', encoding='utf-8') as f:
-            if('插图' in item):
-                path = os.path.join(raw_root_path, 'illustration')
-                f.write(get_illustration(path))
-                flag = 1
-            else:
-                # 没有插图的特殊的短篇还不知道怎么处理，暂时先放置吧。
-                if(flag): index = index - 1
-                path = os.path.join(raw_root_path, '{}_{}.txt'.format(index, item))
-                f.write(get_chapter(path))
+            # 没有插图的特殊的短篇还不知道怎么处理，暂时先放置吧。
+            path = os.path.join(raw_root_path, '{}${{{}}}.txt'.format(index, item))
+            f.write(get_chapter(path, item))
 
-genespace = 'get'
-target_list = ['一', '二']
-for target in target_list:
-    target = '第{}卷'.format(target)
-    raw_root_path = r'F:\大学\项目\轻文解析器\build\青梅竹马绝对不会输的恋爱喜剧\{}'.format(target)
-    build_path = '{}/try'.format(genespace)
-    if(os.path.exists(build_path)):
-        shutil.rmtree(build_path)
-    construct_epub('青梅竹马绝对不会输的恋爱喜剧', '二丸修一', '{}-{}'.format('青梅竹马绝对不会输的恋爱喜剧', target), build_path, raw_root_path)
-    file_walk = os.walk(build_path)
-    f = zipfile.ZipFile('{}/{}.epub'.format(genespace, target), 'w', zipfile.ZIP_DEFLATED)
-    for root,sub,file in file_walk:
-        root_re = root.replace(build_path, '.')
-        for sin in file:
-            if(os.path.splitext(sin)[1] == '.epub'): continue
-            f.write(os.path.join(root, sin), os.path.join(root_re, sin))
-    f.close()
-    shutil.rmtree(build_path)
+def epub_zip(novel_name, novel_author, output_dir, build_dir):
+    if(not os.path.exists(output_dir)):
+        os.makedirs(output_dir, 0x777)
+    for volume in os.listdir(build_dir):
+        volume_path = os.path.join(build_dir, volume)
+        chapter_list = os.listdir(volume_path)
+        info_dict = {}
+        for chapter in chapter_list:
+            if(chapter == '插图'): continue
+            chapter = os.path.splitext(chapter)[0]
+            index = chapter.split('$')[0]
+            name = re.findall('{(.*?)}', chapter.split('$')[1])[0]
+            info_dict[index] = name
+        volume_title = '{}-{}'.format(novel_name, volume)
+        construct_epub(novel_name, novel_author, volume_title, output_dir, volume_path, info_dict)
+        file_walk = os.walk(output_dir)
+        f = zipfile.ZipFile('{}/{}.epub'.format('get', volume_title), 'w', zipfile.ZIP_DEFLATED)
+        for root,sub,file in file_walk:
+            root_re = root.replace(output_dir, '.')
+            for sin in file:
+                if(os.path.splitext(sin)[1] == '.epub'): continue
+                f.write(os.path.join(root, sin), os.path.join(root_re, sin))
+        f.close()
+        shutil.rmtree(output_dir)

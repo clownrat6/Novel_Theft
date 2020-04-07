@@ -13,7 +13,7 @@ def dict_load(save_filepath):
 
 def pic_write(content, save_filepath):
     with open(save_filepath, 'wb') as f:
-        print(save_filepath)
+        print(save_filepath, 'downloading done!')
         f.write(content)
 
 def etree_string(root):

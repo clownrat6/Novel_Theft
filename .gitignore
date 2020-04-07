@@ -5,6 +5,7 @@ __pycache__/
 
 # local
 /.vscode/
+/build/
 
 # file
 
@@ -15,4 +16,6 @@ __pycache__/
 /*.txt
 /try.py
 !/target.txt
+/get/*
+!/get/foo.txt
 
