@@ -64,13 +64,12 @@ def get_ncx(title, author, info_dict, template_ncx_path='material/template.ncx')
     docAuthor.text = author
     navMap = root_children[3]
     navNode_c = navMap.xpath('//x:navPoint[@id="coverpage"]', namespaces={'x': namespace})[0]
-    index = 0
-    index += 1
-    navMap.append(create_navnode(navNode_c, 'illustration', str(index), \
+    navMap.append(create_navnode(navNode_c, 'illustration', '1', \
                  'illustration.html', '插图', namespace))
-    for key in info_dict.keys():
-        index += 1
-        navMap.append(create_navnode(navNode_c, 'chapter' + str(key), str(index), \
+    key_list = list(info_dict.keys())
+    key_list = sorted(key_list, key=lambda x:int(x))
+    for key in key_list:
+        navMap.append(create_navnode(navNode_c, 'chapter' + str(key), str(int(key)+1), \
                       'chapter{}.html'.format(key), info_dict[key], namespace))
     
     head = """<?xml version="1.0" encoding="UTF-8"?>
@@ -99,7 +98,9 @@ def get_opf(info_dict, build_path, book_title, template_ncx_path='material/templ
     itemref_cov = spine.xpath('x:itemref[@idref="coverpage"]', namespaces={'x': namespace})[0]
     manifest.append(create_item(item_cov, '插图', 'illustration.html'))
     spine.append(create_itemref(itemref_cov, '插图'))
-    for key in info_dict.keys():
+    key_list = list(info_dict.keys())
+    key_list = sorted(key_list, key=lambda x:int(x))
+    for key in key_list:
         manifest.append(create_item(item_cov, 'chapter' + str(key), 'chapter{}.html'.format(key)))
         spine.append(create_itemref(itemref_cov, 'chapter' + str(key)))
     pic_cov = manifest.xpath('x:item[@id="cover-image"]', namespaces={'x': namespace})[0]
