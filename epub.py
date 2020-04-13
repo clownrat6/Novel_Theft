@@ -79,7 +79,7 @@ def get_ncx(title, author, info_dict, template_ncx_path='material/template.ncx')
     
     return head + etree_string(root)
 
-def get_opf(info_dict, build_path, book_title, template_ncx_path='material/template.opf'):
+def get_opf(info_dict, build_path, book_title, author_name, template_ncx_path='material/template.opf'):
     namespace = 'http://www.idpf.org/2007/opf'
     dc_namespace = 'http://purl.org/dc/elements/1.1/'
     ncx_f = etree.parse(template_ncx_path)
@@ -89,7 +89,7 @@ def get_opf(info_dict, build_path, book_title, template_ncx_path='material/templ
     date = metadata.xpath('//dc:date', namespaces={'dc': dc_namespace})[0]
     date.text = get_time()
     creator = metadata.xpath('//dc:creator', namespaces={'dc': dc_namespace})[0]
-    creator.text = 'sen'
+    creator.text = author_name
     title = metadata.xpath('//dc:title', namespaces={'dc': dc_namespace})[0]
     title.text = book_title
     manifest = root_children[1]
@@ -169,7 +169,7 @@ def construct_epub(novel_name, novel_author, epub_title, build_path, raw_root_pa
         ncx = get_ncx(novel_name, novel_author, info_dict)
         f.write(ncx)
     with open('{}/OPS/sen.opf'.format(build_path), 'w', encoding='utf-8') as f:
-        opf = get_opf(info_dict, build_path, epub_title)
+        opf = get_opf(info_dict, build_path, epub_title, novel_author)
         f.write(opf)
 
     with open('{}/OPS/illustration.html'.format(build_path), 'w', encoding='utf-8') as f:

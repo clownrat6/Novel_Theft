@@ -10,7 +10,7 @@ from concurrent.futures import wait,ALL_COMPLETED
 
 # 现在是以单本书为单元的程序了
 # 主页 url
-main_page_url = 'https://www.wenku8.net/book/2725.htm'
+main_page_url = 'https://www.wenku8.net/book/1953.htm'
 
 # 获取小说文字，插图，名字，作者
 novel_name,author_name,novel_content_url = one_stage_parse(main_page_url)
