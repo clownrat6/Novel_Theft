@@ -63,3 +63,13 @@ def word_to_num(word):
 
 def get_time():
     return time.strftime("%Y-%m-%d", time.localtime(time.time()))
+
+def parse_info(txt_path):
+    ret_list = []
+    with open(txt_path, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.strip()
+            ret_list.append(line)
+    
+    return ret_list

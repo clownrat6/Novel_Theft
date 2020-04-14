@@ -35,4 +35,9 @@
 
 ## 使用
 
-更改 main.py 中的 main_page_url ，然后输入 python main.py 然后就可以获取 epub 了。
+使用参数 `--url` 和 `--txt` 来使用该仓库：  
+```
+--url [轻小说文库某小说主页]
+```
+使用示例:  
+python main.py --url https://www.wenku8.net/book/2285.htm
